@@ -1,0 +1,6 @@
+streamlit
+multiprocessing
+functools
+pandas
+pydub
+speech_recognition
