@@ -6,6 +6,10 @@ import pandas as pd
 from pydub import AudioSegment
 import speech_recognition as sr
 import streamlit as st
+import tempfile
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 def analyze_text_for_personal_details(text):
     email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
@@ -23,23 +27,27 @@ def detect_keywords(input_text, keywords):
     return keyword_presence
 
 def process_audio_chunk(chunk, recognizer):
-    chunk.export("temp.wav", format="wav")
-    with sr.AudioFile("temp.wav") as source:
-        audio_data = recognizer.record(source)
-        try:
+    try:
+        chunk.export("temp.wav", format="wav")
+        with sr.AudioFile("temp.wav") as source:
+            audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data, show_all=True, language='en-US')  # Adjust parameters
             if 'alternative' in text:
                 text = text['alternative'][0]['transcript']
             return text
-        except sr.UnknownValueError:
-            return ""
-        except sr.RequestError as e:
-            print(f"Error with the speech recognition service: {e}")
-            return ""
+    except Exception as e:
+        logging.error(f"Error processing audio chunk: {e}")
+        return ""
 
 def process_audio_file(audio_file, keywords):
     recognizer = sr.Recognizer()
-    audio = AudioSegment.from_mp3(audio_file)
+
+    # Save BytesIO to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False) as temp_audio_file:
+        temp_audio_file.write(audio_file.read())
+
+    # Load temporary file with pydub
+    audio = AudioSegment.from_mp3(temp_audio_file.name)
 
     chunk_size_ms = 5000
     chunks = [audio[i:i + chunk_size_ms] for i in range(0, len(audio), chunk_size_ms)]
