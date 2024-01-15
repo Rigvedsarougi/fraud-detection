@@ -1,4 +1,4 @@
 streamlit
 pandas
 pydub
-speech_recognition
+SpeechRecognition
