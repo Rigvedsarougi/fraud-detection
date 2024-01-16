@@ -1,0 +1,6 @@
+streamlit==1.11.0
+pandas==1.3.3
+pydub==0.26.6
+SpeechRecognition==3.8.1
+multiprocess==0.70.12.2
+numpy==1.21.2 
