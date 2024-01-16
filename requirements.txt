@@ -1,4 +1,0 @@
-streamlit
-pandas
-pydub
-SpeechRecognition
